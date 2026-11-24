@@ -24,6 +24,21 @@ CRM export (Pipedrive-style)  ->  Postgres  ->  Auto Ontology  ->  chat / MCP / 
 3. Added the **agreed funnel definitions** as SQL metrics (leads, qualified leads, SQLs, won deals, won revenue, channel view, a canonical monthly funnel).
 4. Asked the same funnel question 8 times per setup and scored every answer against a known-correct result.
 
+## What it looks like (synthetic demo)
+
+Screenshots from a compile of the synthetic database only. No client data appears in them.
+
+| Ontology graph | Terms and their metrics |
+|---|---|
+| ![The four terms and their links](docs/images/01-semantic-graph.jpg) | ![Terms catalog with column, metric and related-term counts](docs/images/02-terms-catalog.jpg) |
+
+| The funnel metrics under the Deal term | A chat answer with its SQL |
+|---|---|
+| ![Deal term showing six SQL metrics](docs/images/03-deal-term-metrics.jpg) | ![Chat answer with SQL and result table](docs/images/04-chat-answer-with-sql.jpg) |
+
+The chat answer (13 deals won in one month, counted by won date) matched the same query run directly on the demo database.
+That was a single check, not a repeat test; see the accuracy results below for how consistent answers were.
+
 ## Results of the accuracy tests
 
 Same question every time ("for one month: how many leads, qualified leads, SQLs and won deals, and the won revenue?").
@@ -110,6 +125,7 @@ Percentages in the demo are illustrative of the generator, not of any real busin
 | `data/synthetic/` | Generated CSVs (synthetic) |
 | `patches/` | Local patch for Auto Ontology |
 | `docs/test-log.md` | Test-by-test tables |
+| `docs/images/` | Screenshots of the synthetic demo |
 
 ## Credits
 
