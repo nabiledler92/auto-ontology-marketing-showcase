@@ -127,6 +127,11 @@ Percentages in the demo are illustrative of the generator, not of any real busin
 | `docs/test-log.md` | Test-by-test tables |
 | `docs/images/` | Screenshots of the synthetic demo |
 
+## Licence
+
+My code, SQL, synthetic data and write-ups are under the [MIT licence](LICENSE).
+The file in `patches/` is a diff of NVIDIA's Auto Ontology code and stays under NVIDIA's Apache-2.0 licence, not MIT.
+
 ## Credits
 
 Built on [NVIDIA Auto Ontology](https://github.com/NVIDIA/auto-ontology) (Apache-2.0). Not affiliated with or endorsed by NVIDIA.

@@ -76,7 +76,7 @@ against a hosted API, writing up honest limits.
 | Decision | Options |
 |---|---|
 | Repo visibility | Public. Commits use the GitHub no-reply email, not a personal email |
-| Licence for my own code | MIT or Apache-2.0 (none added yet) |
+| Licence for my own code | Decided: MIT (see `LICENSE`). The patch in `patches/` stays under NVIDIA's Apache-2.0 licence |
 | How to describe the client | Currently "an anonymous B2B services company". Do not mention the agency or employer unless Nabil agrees |
 | Screenshots on the portfolio case page | The four demo screenshots exist in `docs/images/`. How images attach to a case-study page in the portfolio site was not checked, so decide that when pasting the entry |
 
