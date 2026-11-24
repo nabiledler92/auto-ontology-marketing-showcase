@@ -75,11 +75,11 @@ against a hosted API, writing up honest limits.
 
 | Decision | Options |
 |---|---|
-| Repo visibility | Private now. Public after review. Commits use the GitHub no-reply email, not a personal email |
+| Repo visibility | Public. Commits use the GitHub no-reply email, not a personal email |
 | Licence for my own code | MIT or Apache-2.0 (none added yet) |
 | How to describe the client | Currently "an anonymous B2B services company". Do not mention the agency or employer unless Nabil agrees |
 | Screenshots on the portfolio case page | The four demo screenshots exist in `docs/images/`. How images attach to a case-study page in the portfolio site was not checked, so decide that when pasting the entry |
 
 ## Status
 
-This repo (`nabiledler92/auto-ontology-marketing-showcase`) was created as **private** for review. It is not public yet. Make it public only after Nabil has read the README and this file and agrees.
+This repo (`nabiledler92/auto-ontology-marketing-showcase`) is **public** as of 2026-11-25, at Nabil's request. Anything added to it from now on is visible to everyone, so apply the never-include checklist above to every change.
