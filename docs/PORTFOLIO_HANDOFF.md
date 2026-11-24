@@ -54,6 +54,8 @@ against a hosted API, writing up honest limits.
 |---|---|
 | `README.md` | Public write-up with results, marketing and CRM value, limits |
 | `docs/test-log.md` | Anonymized test tables |
+| `docs/PORTFOLIO_ENTRY_DRAFT.md` | Ready-to-paste case study object (CS-08 schema for `content/projects.ts`), short CV and LinkedIn versions, and a pre-publish checklist. Not yet added to the portfolio repo; start here when building the portfolio page |
+| `docs/images/` | Four screenshots of the synthetic demo (graph, terms, metrics, chat answer with SQL) |
 | `scripts/generate_synthetic_crm.py` | Synthetic Pipedrive-style CRM, seeded |
 | `scripts/verify_demo.py` | Checks the funnel SQL totals add up on the synthetic data |
 | `sql/` | Canonical monthly funnel and single-purpose metrics |
@@ -76,7 +78,7 @@ against a hosted API, writing up honest limits.
 | Repo visibility | Private now. Public after review. Commits use the GitHub no-reply email, not a personal email |
 | Licence for my own code | MIT or Apache-2.0 (none added yet) |
 | How to describe the client | Currently "an anonymous B2B services company". Do not mention the agency or employer unless Nabil agrees |
-| Screenshots | Need a compile of the synthetic database first (about 5 to 10 minutes and some model quota) |
+| Screenshots on the portfolio case page | The four demo screenshots exist in `docs/images/`. How images attach to a case-study page in the portfolio site was not checked, so decide that when pasting the entry |
 
 ## Status
 
