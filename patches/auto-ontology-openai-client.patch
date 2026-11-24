@@ -1,0 +1,63 @@
+diff --git a/auto_ontology/utils/llm_invoke.py b/auto_ontology/utils/llm_invoke.py
+index 0d82e415..dd0abd33 100644
+--- a/auto_ontology/utils/llm_invoke.py
++++ b/auto_ontology/utils/llm_invoke.py
+@@ -225,33 +225,24 @@ def _build_client(
+     ``ChatOpenAI``, which supports structured output. Everything else uses
+     ``ChatNVIDIA``.
+     """
+-    if model.startswith(("openai/", "azure/", "aws/")):
+-        from langchain_openai import ChatOpenAI
+-
+-        return ChatOpenAI(
+-            model=model,
+-            api_key=api_key,
+-            base_url=base_url,
+-            # temperature omitted: gpt-5.x/o-series reject any explicit value and
+-            # only allow the server default (1). Unset => langchain sends no
+-            # temperature field, so the provider default applies.
+-            # temperature=temperature,
+-            max_tokens=max_tokens,
+-            timeout=LLM_INVOKE_TIMEOUT_S,
+-            max_retries=0,
+-        )
+-
+-    from langchain_nvidia_ai_endpoints import ChatNVIDIA
+-
+-    client = ChatNVIDIA(
++    # LOCAL PATCH: every model goes through ChatOpenAI. ChatNVIDIA sends
++    # nvext.guided_json, which integrate.api.nvidia.com now rejects with HTTP 400.
++    from langchain_openai import ChatOpenAI
++
++    extra: dict = {}
++    if not model.startswith(("openai/", "azure/", "aws/")):
++        # temperature stays omitted for OpenAI-family models: gpt-5.x/o-series reject
++        # any explicit value and only allow the server default (1).
++        extra["temperature"] = temperature
++    return ChatOpenAI(
+         model=model,
+         api_key=api_key,
+         base_url=base_url,
+-        temperature=temperature,
+         max_tokens=max_tokens,
++        timeout=LLM_INVOKE_TIMEOUT_S,
++        max_retries=0,
++        **extra,
+     )
+-    client._client.get_session_fn = lambda: _TimeoutSession(LLM_INVOKE_TIMEOUT_S)
+-    return client
+ 
+ 
+ def get_llm_client(
+@@ -474,6 +465,11 @@ def _structured_output_kwargs(llm: BaseChatModel) -> dict:
+     """
+     if _is_claude(llm):
+         return {"method": "function_calling", "tool_choice": None}
++    model = str(getattr(llm, "model_name", "") or "")
++    if not model.startswith(("openai/", "azure/", "aws/")):
++        # LOCAL PATCH: tool calling works on the NVIDIA-hosted models; json_schema
++        # returned empty content on nemotron-3.5-lightning.
++        return {"method": "function_calling"}
+     return {}
+ 
+ 
