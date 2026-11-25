@@ -1,0 +1,7 @@
+dataset,wording,setup,questions,correct,accuracy_pct,median_seconds
+synthetic demo,explicit (rules spelled out),before views,20,19,95.0,19.5
+synthetic demo,explicit (rules spelled out),after views,20,19,95.0,22.0
+synthetic demo,plain language,before views,17,15,88.2,23.0
+synthetic demo,plain language,after views,17,16,94.1,17.0
+pilot CRM (anonymized),plain language,views + win-rate metric,17,15,88.2,19.0
+pilot CRM (anonymized),plain language,+ person-level channel view,17,17,100.0,23.0

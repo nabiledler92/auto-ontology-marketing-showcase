@@ -1,0 +1,9 @@
+task,model,test_auroc,ci_low,ci_high,note
+lead scoring,generator truth (ceiling),0.606,0.56,0.65,best possible on this synthetic data
+lead scoring,per-channel rate (baseline),0.589,0.54,0.64,
+lead scoring,Kumo Engine FAST (mean of 3 runs),0.559,,,"runs: 0.518, 0.582, 0.578"
+lead scoring,Kumo Engine BEST (1 run),0.544,0.49,0.6,
+deal outcome,generator truth (ceiling),0.529,0.43,0.64,
+deal outcome,per-channel rate (baseline),0.537,0.43,0.65,
+deal outcome,Kumo Engine FAST (mean of 3 runs),0.478,,,"runs: 0.495, 0.444, 0.495"
+deal outcome,Kumo Engine BEST (1 run),0.559,0.46,0.66,inside the noise band

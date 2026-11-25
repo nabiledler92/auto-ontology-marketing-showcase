@@ -14,15 +14,21 @@ ontology from database metadata and exposes it to AI agents through chat, MCP an
 ## What I did
 
 ```
-CRM export (Pipedrive-style)  ->  Postgres  ->  Auto Ontology  ->  chat / MCP / API
- persons, deals, leads, stages     crm.*         terms, links,       answers + the SQL used
-                                                 10 funnel metrics
+CRM export (Pipedrive-style)  ->  Postgres          ->  Auto Ontology      ->  chat / MCP / API
+ persons, deals, leads, stages     crm.* + views         terms, links,          answers + the SQL used
+                                   (rules built in)      10 funnel metrics
+                                                              |
+                                                   NVIDIA hosted models (build + answering)
 ```
+
+Everything ran locally in Docker except the language models, which NVIDIA hosts. Answering used Nemotron 3.5 Lightning
+(the tool's default) in B1 and B2 and Nemotron Ultra from B3 on.
 
 1. Loaded the CRM tables into Postgres (a spreadsheet stood in for a warehouse the client did not have yet).
 2. Let Auto Ontology build the first draft automatically (terms, column descriptions, table links).
 3. Added the **agreed funnel definitions** as SQL metrics (leads, qualified leads, SQLs, won deals, won revenue, channel view, a canonical monthly funnel).
 4. Asked the same funnel question 8 times per setup and scored every answer against a known-correct result.
+5. **Removed choices from the AI:** database views that build the rules in (`sql/analytics_views.sql`), and two confusing tables hidden from the agent.
 
 ## What it looks like (synthetic demo)
 
@@ -44,18 +50,38 @@ That was a single check, not a repeat test; see the accuracy results below for h
 Same question every time ("for one month: how many leads, qualified leads, SQLs and won deals, and the won revenue?").
 Scored by value against the client's own reference figures. 8 runs per batch is a small sample.
 
-| Batch | Setup | Fully correct | Notes |
-|---|---|---|---|
-| B1 | Smaller default model, definitions in term descriptions | 3 of 8 | Counted won deals by creation month; once took leads from the wrong table |
-| B2 | Same, plus one canonical monthly funnel query | 2 of 8 | Agent never used the canonical query; once returned SQL made only of typed-in numbers |
-| B3 | Larger model (Nemotron Ultra) for answering | 4 of 8 | Leads, qualified, SQLs right every time; won-by-creation-month error in 4 runs |
-| B4 | Larger model, plus a narrow "won deals by won month" metric | **6 of 8** | The creation-month error did not appear; two new, different errors did |
+| Batch | Setup | Fully correct | Median time | Notes |
+|---|---|---|---|---|
+| B1 | Smaller default model (Nemotron 3.5 Lightning), definitions in term descriptions | 3 of 8 | 44 s | Counted won deals by creation month; once took leads from the wrong table |
+| B2 | Same, plus one canonical monthly funnel query | 2 of 8 | 36.5 s | Agent never used the canonical query; once returned SQL made only of typed-in numbers |
+| B3 | Larger model (Nemotron Ultra) for answering | 4 of 8 | 54 s | Leads, qualified, SQLs right every time; won-by-creation-month error in 4 runs |
+| B4 | Larger model, plus a narrow "won deals by won month" metric | 6 of 8 | 59.5 s | The creation-month error did not appear; two new, different errors did |
+| B5 | Larger model, plus views that build the rules in and 2 confusing tables hidden | **8 of 8** | 21 s | Correct every run, and faster |
+
+The fix carried over beyond one question. Each question asked once, scored by value:
+
+| Question set | Before | After |
+|---|---|---|
+| Pilot data, 17 plain-language questions | 15/17 (views and a stated win-rate metric) | **17/17** (plus a person-level channel view) |
+| Synthetic demo, 17 plain-language questions | 15/17 (before views) | 16/17 (after views) |
+| Synthetic demo, 20 questions with the rules spelled out | 19/20 (before views) | 19/20 (after views) |
+
+The build itself: the first compile had 9 failed model calls and described 104 of 130 columns; after the patch there were
+no failures, and after the rebuild with views all 156 of 156 columns were described. Chart data is in `docs/article-data/`.
 
 What the tests show:
-- **Narrow, single-purpose metrics beat long descriptions.** The score improved when one metric stated exactly one way to compute one figure.
-- **A bigger model removed the worst failures** (no answer, SQL with no table behind it) but not the wrong-date error.
-- **It is not reliable enough to trust blindly.** Read the SQL under any funnel number, or certify the metrics and re-test.
-- **It refuses honestly.** Asked for ad spend (not in the data), it said so instead of inventing a number.
+- **Remove choices instead of adding words.** Descriptions and a bigger model gave 4 to 6 of 8; views that build the rules in, plus hiding the tables that confused the agent, gave 8 of 8.
+- **Narrow, single-purpose metrics beat long descriptions** and one big query. Every ambiguous word ("SQL", "win rate") needs one stated definition.
+- **A bigger model removed the worst failures** (no answer, SQL with no table behind it) but still guessed the rules.
+- **Measure with repeats.** Single answers looked fine; repeats showed a coin flip before the fix.
+- **It refuses honestly.** Asked for ad spend (not in the data), it said so instead of inventing a number (once it returned empty cost columns instead of a clean refusal).
+
+## Side test: lead scoring with Kumo Engine (synthetic data only)
+
+I also tried Kumo Engine for lead scoring on the synthetic CRM, on a local CPU. Its test AUROC was 0.52 to 0.58 across
+runs; a simple per-channel conversion rate scored 0.589, and the best possible on this data was 0.606. The synthetic data's
+only real signal is the channel, so this says nothing about Kumo Engine on richer data. The lesson is the order of work:
+measure a simple baseline before a model. Numbers are in `docs/article-data/kumo_auroc_synthetic.csv`.
 
 ## How this helps marketing
 
@@ -78,10 +104,11 @@ What the tests show:
 
 ## Honest limits
 
-- Accuracy is not yet dependable; best result so far is 6 of 8 on one question.
-- Nothing is certified (certification is the human review step) and I have not tested other questions at scale.
-- Sampled column values and questions are sent to NVIDIA's hosted models. I dropped contact details before loading and you should review this before using real client data.
-- Predictions through the optional Kumo integration were **not** tested.
+- Not production-ready or "always right". 8 of 8 is on one question; 8 runs per batch and one run per question in the larger sets are small samples.
+- Each fix was tuned on the questions tested. New questions can bring new errors, so read the SQL under any funnel number.
+- Nothing is certified (certification is the human review step).
+- Sampled column values, questions and embeddings are sent to NVIDIA's hosted models. I dropped contact details before loading and you should review this before using real client data.
+- Auto Ontology's built-in Kumo prediction integration was **not** tested. The separate Kumo Engine test above used synthetic data only.
 
 ## Fixing an incompatibility (patch included)
 
@@ -126,7 +153,10 @@ Percentages in the demo are illustrative of the generator, not of any real busin
 | `data/synthetic/` | Generated CSVs (synthetic) |
 | `patches/` | Local patch for Auto Ontology |
 | `docs/test-log.md` | Test-by-test tables |
+| `docs/article-data/` | Chart data (CSV): batches, question sets, build quality, Kumo Engine AUROC. Test results only, no client data |
 | `docs/images/` | Screenshots of the synthetic demo |
+
+A longer write-up with charts is on my portfolio: [Can an AI ontology layer answer marketing funnel questions?](https://nabil-takiyuddin.dev/articles/auto-ontology-marketing-crm)
 
 ## Licence
 

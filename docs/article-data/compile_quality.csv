@@ -1,0 +1,4 @@
+stage,failed_model_calls,columns_described,columns_total,table_links
+"First compile, default client library",9,104,130,1
+After the 6-line client patch,0,125,126,5
+After views + hidden tables (rebuilt),0,156,156,5
