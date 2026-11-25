@@ -122,6 +122,7 @@ Percentages in the demo are illustrative of the generator, not of any real busin
 | `scripts/verify_demo.py` | Runs the funnel SQL and checks totals add up |
 | `sql/monthly_funnel.sql` | Canonical monthly funnel query |
 | `sql/funnel_metrics.sql` | The single-purpose metrics |
+| `sql/analytics_views.sql` | Views that build the funnel rules into the database (tested in `docs/test-log.md`, section 4d) |
 | `data/synthetic/` | Generated CSVs (synthetic) |
 | `patches/` | Local patch for Auto Ontology |
 | `docs/test-log.md` | Test-by-test tables |

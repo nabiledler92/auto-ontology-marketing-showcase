@@ -52,6 +52,34 @@ Scored by value, not by column name (my first scoring script used column names a
 | Fixing one error did not stop the agent making different ones | Expect to add a metric per recurring error, or keep a human check |
 | 8 runs per batch is a small sample | Treat 6 of 8 as encouraging, not proven |
 
+### 4d. Views plus a hidden table, measured on the synthetic demo (2026-11-25)
+
+Setup: synthetic demo stack (no client data), Ultra model for answering, the same 8 metrics before and after.
+Change: three database views that build the rules in (`crm.funnel_monthly`, `crm.won_deals` with a ready `won_month`,
+`crm.deals_with_channel` with the agreed channel group), and the `leads` inbox table hidden with a connection table filter
+(`table_deny_regex = '^leads$'`, which needs an app-managed connection, not `CONNECTION_STRINGS`). Metrics re-pointed at the views.
+Each question asked once per setup; expected answers computed by SQL directly on the database; scored by value.
+
+| Question set | Before | After | Answers that queried a view (after) |
+|---|---|---|---|
+| Explicit wording, rules spelled out in the question (20) | 19/20 | 19/20 | 12/20 (0 before) |
+| Plain wording, how a marketer would ask (17) | 15/17 | **16/17** | 12/17 (0 before) |
+
+| Miss | Before | After | Why |
+|---|---|---|---|
+| "How many SQLs in November 2025?" (plain) | Wrong: invented a stage-based SQL definition (8 instead of 18) | **Fixed** | The agent used the stated metric/view instead of guessing |
+| "What is our win rate for Google Ads?" (plain) | won / (won + lost) = 0.58 | Same | Two common definitions; the expected answer used won / all deals (0.32). The question is ambiguous, not the data |
+| "Deals lost during 2025, by the date lost" (explicit) | Grouped by day instead of one total | Same | Wording, not wrong data |
+
+| Takeaway | Meaning |
+|---|---|
+| The synthetic demo was already accurate before the change (19/20, 15/17) | Ceiling effect: this set cannot show a big gain. The clean synthetic schema (no duplicate deal table, no ambiguous lead table) may be most of why. *Later tested on the pilot's real CRM data: the same approach lifted the 8-run funnel test from 6 to 8 of 8, and a 17-question plain-language set reached 17 of 17 after a person-level channel view was added* |
+| The agent adopted the views quickly (0 to 12 answers per set) | Views are an easy, deterministic way to fix rules such as "won counts by won date" |
+| Remaining misses are definition questions (win rate) | Add a stated metric for every ambiguous business word (win rate, SQL), not more plumbing |
+| One run per question | Small sample; a repeat would show run-to-run variation |
+
+Next: apply the same approach to a real CRM schema that has duplicate and ambiguous tables, add a stated win-rate metric, and re-run the 8-run funnel test there.
+
 ## 5. What I understand about Auto Ontology
 
 | Part | What it does | My experience |
